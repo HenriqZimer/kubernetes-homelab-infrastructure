@@ -24,7 +24,6 @@ A production-ready, self-hosted Kubernetes cluster for homelab environments with
 ### 🌐 Networking & Ingress
 - **Ingress-NGINX** - HTTP/HTTPS traffic routing
 - **MetalLB** - Bare-metal load balancer
-- **Cloudflare DNS** - External DNS management
 
 ### 💾 Storage
 - **NFS** - Persistent storage backend
