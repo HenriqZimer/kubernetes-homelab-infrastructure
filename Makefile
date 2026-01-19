@@ -1,4 +1,4 @@
-.PHONY: help pre namespace cleanup-pvs pvs storageclass secrets cert-manager helm deploy status validate clean unseal-vault
+.PHONY: help pre namespace cleanup-pvs pvs storageclass secrets cert-manager helm kyverno deploy status validate clean unseal-vault
 
 # Colors for output
 GREEN  := \033[0;32m
@@ -12,7 +12,7 @@ RESET  := \033[0m
 
 help: ## Display this help message
 	@echo "$(BLUE)═══════════════════════════════════════════════════════════════$(RESET)"
-	@echo "$(BLUE)  Kubernetes Homelab Cluster - Makefile Help$(RESET)"
+	@echo "$(BLUE)  Kubernetes Cluster Infrastructure - Makefile Help$(RESET)"
 	@echo "$(BLUE)═══════════════════════════════════════════════════════════════$(RESET)"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(GREEN)%-20s$(RESET) %s\n", $$1, $$2}'
@@ -21,6 +21,7 @@ help: ## Display this help message
 	@echo "  make $(GREEN)deploy$(RESET)        # Full deployment from scratch"
 	@echo "  make $(GREEN)status$(RESET)        # Check cluster status"
 	@echo "  make $(GREEN)validate$(RESET)      # Validate configurations"
+	@echo "  make $(GREEN)clean$(RESET)         # Clean up all resources"
 	@echo ""
 
 pre: ## Install MetalLB load balancer
@@ -31,7 +32,7 @@ pre: ## Install MetalLB load balancer
 	@echo "$(GREEN)✅ MetalLB installed$(RESET)"
 	@echo ""
 
-namespace: ## Create all required namespaces
+namespaces: ## Create all required namespaces
 	@echo "$(BLUE)📦 Creating namespaces...$(RESET)"
 	@kubectl apply -f manifests/namespace.yaml
 	@echo "$(GREEN)✅ Namespaces created$(RESET)"
@@ -66,7 +67,7 @@ pvs: cleanup-pvs storageclass ## Create PersistentVolumes
 secrets: ## Apply ExternalSecrets configuration
 	@echo "$(BLUE)🔐 Applying External Secrets...$(RESET)"
 	@kubectl apply -f manifests/external-secrets/cluster-secret-store.yaml
-	@kubectl apply -f manifests/external-secret.yaml
+	@kubectl apply -f manifests/external-secrets.yaml
 	@echo "$(GREEN)✅ External Secrets applied$(RESET)"
 	@echo ""
 
@@ -76,9 +77,12 @@ cert-manager: ## Apply cert-manager ClusterIssuer
 	@echo "$(GREEN)✅ cert-manager configured$(RESET)"
 	@echo ""
 
-helm: namespace pvs secrets ## Deploy all Helm releases
+helm: namespaces pvs secrets ## Deploy all Helm releases
 	@echo "$(BLUE)🚀 Deploying Helm releases...$(RESET)"
 	@helmfile apply
+	@echo ""
+	@echo "$(BLUE)⏳ Waiting for deployments to be ready...$(RESET)"
+	@sleep 10
 	@echo "$(GREEN)✅ Helm releases deployed$(RESET)"
 	@echo ""
 
@@ -119,12 +123,18 @@ status: ## Check cluster status
 	@echo ""
 
 validate: ## Validate Kubernetes manifests
-	@echo "$(BLUE)🔍 Validating manifests...$(RESET)"
-	@for file in $$(find manifests -name "*.yaml"); do \
-		echo "  Validating $$file..."; \
-		kubectl apply --dry-run=client -f $$file > /dev/null 2>&1 || echo "$(RED)❌ $$file$(RESET)"; \
+	@echo "$(BLUE)🔍 Validating Kubernetes manifests...$(RESET)"
+	@echo ""
+	@for file in manifests/*.yaml manifests/**/*.yaml; do \
+		if [ -f "$$file" ]; then \
+			echo "$(YELLOW)Validating $$file...$(RESET)"; \
+			kubectl apply --dry-run=client -f "$$file" >/dev/null 2>&1 && \
+				echo "$(GREEN)  ✓ Valid$(RESET)" || \
+				echo "$(RED)  ✗ Invalid$(RESET)"; \
+		fi; \
 	done
-	@echo "$(GREEN)✅ Validation complete$(RESET)"
+	@echo ""
+	@echo "$(GREEN)✅ Validation completed$(RESET)"
 	@echo ""
 
 unseal-vault: ## Instructions to unseal Vault
@@ -142,15 +152,31 @@ unseal-vault: ## Instructions to unseal Vault
 	@echo "  kubectl exec -n vault vault-0 -- vault status"
 	@echo ""
 
-clean: ## Clean up cluster resources (DANGEROUS)
-	@echo "$(RED)⚠️  WARNING: This will delete all resources!$(RESET)"
-	@read -p "Are you sure? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		echo "$(RED)🗑️  Cleaning up...$(RESET)"; \
-		helmfile destroy || true; \
-		kubectl delete -f manifests/ --recursive || true; \
-		echo "$(GREEN)✅ Cleanup complete$(RESET)"; \
-	else \
-		echo "$(YELLOW)Cancelled$(RESET)"; \
-	fi
+clean: ## Clean up all resources (WARNING: Destructive operation!)
+	@echo "$(RED)⚠️  WARNING: This will delete all cluster infrastructure resources!$(RESET)"
+	@echo "$(YELLOW)Press Ctrl+C to cancel, or wait 5 seconds to continue...$(RESET)"
+	@sleep 5
+	@echo ""
+	@echo "$(BLUE)🗑️  Removing Helm releases...$(RESET)"
+	@helmfile destroy || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting Kyverno policies...$(RESET)"
+	@kubectl delete -f manifests/kyverno/ --ignore-not-found=true || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting cert-manager resources...$(RESET)"
+	@kubectl delete -f manifests/cert-manager/ --ignore-not-found=true || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting ExternalSecrets...$(RESET)"
+	@kubectl delete -f manifests/external-secrets.yaml --ignore-not-found=true || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting PVs...$(RESET)"
+	@kubectl delete -f manifests/persistent-volume.yaml --ignore-not-found=true || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting StorageClass...$(RESET)"
+	@kubectl delete -f manifests/storageclass.yaml --ignore-not-found=true || true
+	@echo ""
+	@echo "$(BLUE)🗑️  Deleting namespaces...$(RESET)"
+	@kubectl delete -f manifests/namespace.yaml --ignore-not-found=true || true
+	@echo ""
+	@echo "$(GREEN)✅ Cleanup completed$(RESET)"
+	@echo ""

@@ -21,7 +21,7 @@ unseal-keys.*
 
 # Kubernetes secrets (if accidentally exported)
 *.secret.yaml
-*-secret.yaml
+*-secrets.yaml
 
 # ───────────────────────────────────────────────────────────────
 # Credentials and Tokens
@@ -45,6 +45,7 @@ kubeconfig*
 charts/
 *.tgz
 Chart.lock
+helmfile.lock
 
 # ───────────────────────────────────────────────────────────────
 # Terraform (future use)

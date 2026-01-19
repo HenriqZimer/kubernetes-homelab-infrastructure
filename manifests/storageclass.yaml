@@ -11,3 +11,4 @@ metadata:
 volumeBindingMode: Immediate
 # Não permite provisionamento dinâmico - apenas vinculação manual a PVs existentes
 provisioner: kubernetes.io/no-provisioner
+# reclaimPolicy: Retain

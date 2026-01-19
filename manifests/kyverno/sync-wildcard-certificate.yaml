@@ -1,0 +1,40 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: sync-wildcard-certificate
+  annotations:
+    policies.kyverno.io/title: Sync Wildcard TLS Certificate
+    policies.kyverno.io/category: Certificate Management
+    policies.kyverno.io/subject: Secret
+    policies.kyverno.io/description: >-
+      Synchronizes the wildcard TLS certificate secret from cert-manager namespace
+      to all namespaces that need it, ensuring all ingresses can use the same certificate.
+spec:
+  generateExistingOnPolicyUpdate: true
+  rules:
+    - name: sync-wildcard-tls-secret
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              names:
+                - monitoring
+                - argocd
+                - jenkins
+                - sonarqube
+                - harbor
+                - vault
+                - portainer
+                - jellyfin
+                - romm
+      generate:
+        apiVersion: v1
+        kind: Secret
+        name: wildcard-henriqzimer-tls
+        namespace: "{{request.object.metadata.name}}"
+        synchronize: true
+        clone:
+          namespace: cert-manager
+          name: wildcard-henriqzimer-tls

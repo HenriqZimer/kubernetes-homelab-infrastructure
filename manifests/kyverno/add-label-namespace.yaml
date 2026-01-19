@@ -1,10 +1,14 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: add-label-namespace
+  name: add-managed-by-label-namespace
+  annotations:
+    policies.kyverno.io/title: Add Managed-By Label to Namespaces
+    policies.kyverno.io/category: Namespace Management
+    policies.kyverno.io/description: Automatically adds managed-by label to all new namespaces
 spec:
   rules:
-    - name: add-label-to-namespace
+    - name: add-managed-by-label
       match:
         resources:
           kinds:
@@ -13,4 +17,4 @@ spec:
         patchStrategicMerge:
           metadata:
             labels:
-              Henrique: "Kyverno"
+              +(app.kubernetes.io/managed-by): "kyverno"

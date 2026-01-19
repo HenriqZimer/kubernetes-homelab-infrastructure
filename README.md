@@ -1,11 +1,12 @@
-# 🏠 Kubernetes Homelab Cluster
+# 🏠 Kubernetes Homelab Infrastructure
 
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.30+-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Helm](https://img.shields.io/badge/Helm-v3.14+-0F1689?logo=helm&logoColor=white)](https://helm.sh/)
+[![Vault](https://img.shields.io/badge/Vault-1.21+-000000?logo=vault&logoColor=white)](https://www.vaultproject.io/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-Latest-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-A production-ready, self-hosted Kubernetes cluster for homelab environments with enterprise-grade security, monitoring, and secrets management.
+A production-ready, self-hosted Kubernetes cluster infrastructure for homelab environments with enterprise-grade security, monitoring, and secrets management.
 
 ## ✨ Features
 

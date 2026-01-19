@@ -627,7 +627,7 @@ alertmanager:
     ## Secret must be manually created in the namespace
     ##
     tls:
-      - secretName: wildcard-henriqzimer-tls
+      - secretName: alertmanager-tls
         hosts:
           - alertmanager.henriqzimer.com.br
 
@@ -1352,7 +1352,7 @@ grafana:
     ## Secret must be manually created in the namespace
     ##
     tls:
-      - secretName: wildcard-henriqzimer-tls
+      - secretName: grafana-tls
         hosts:
           - grafana.henriqzimer.com.br
 
@@ -3777,7 +3777,7 @@ prometheus:
     ## Secret must be manually created in the namespace
     ##
     tls:
-      - secretName: wildcard-henriqzimer-tls
+      - secretName: prometheus-tls
         hosts:
           - prometheus.henriqzimer.com.br
 

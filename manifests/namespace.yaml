@@ -4,12 +4,22 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: vault
+  labels:
+    app.kubernetes.io/name: vault
+    app.kubernetes.io/component: secrets-management
+    app.kubernetes.io/managed-by: helmfile
+    environment: production
 ---
 # Namespace cert-manager
 apiVersion: v1
 kind: Namespace
 metadata:
   name: cert-manager
+  labels:
+    app.kubernetes.io/name: cert-manager
+    app.kubernetes.io/component: tls-management
+    app.kubernetes.io/managed-by: helmfile
+    environment: production
 ---
 # Namespace monitoring
 # Pod Security: 'privileged' mode is required for node-exporter
@@ -20,6 +30,10 @@ kind: Namespace
 metadata:
   name: monitoring
   labels:
+    app.kubernetes.io/name: kube-prometheus
+    app.kubernetes.io/component: observability
+    app.kubernetes.io/managed-by: helmfile
+    environment: production
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/audit: privileged
     pod-security.kubernetes.io/warn: privileged
