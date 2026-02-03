@@ -2,14 +2,6 @@
 # Kubernetes Homelab Cluster - GitIgnore
 # ═══════════════════════════════════════════════════════════════
 
-# ───────────────────────────────────────────────────────────────
-# Sensitive Kubernetes Resources - NEVER COMMIT THESE
-# ───────────────────────────────────────────────────────────────
-/manifests/cert-manager/secret-cloudflare-api-token.yaml
-/manifests/cloudflared/secret-tunnel-remote-token.yaml
-**/secret-*.yaml
-**/secrets/
-
 # Vault sensitive data
 /manifests/vault/vault-keys.json
 vault-keys.json

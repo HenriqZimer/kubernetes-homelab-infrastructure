@@ -33,7 +33,7 @@ releases:
     namespace: cert-manager
     createNamespace: true
     chart: jetstack/cert-manager
-    version: 1.19.1
+    version: 1.19.2
     values:
       - values/cert-manager/values.yaml
 
@@ -41,7 +41,7 @@ releases:
     namespace: kyverno
     createNamespace: true
     chart: kyverno/kyverno
-    version: 3.6.0
+    version: 3.7.0-rc.2
     values:
       - values/kyverno/values.yaml
 
@@ -49,7 +49,7 @@ releases:
     namespace: vault
     createNamespace: true
     chart: hashicorp/vault
-    version: 0.31.0
+    version: 0.32.0
     values:
       - values/vault/values.yaml
 
@@ -72,6 +72,6 @@ releases:
     namespace: monitoring
     createNamespace: true
     chart: prometheus-community/kube-prometheus-stack
-    version: 79.7.1
+    version: 81.2.2
     values:
       - values/kube-prometheus/values.yaml
